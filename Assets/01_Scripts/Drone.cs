@@ -4,96 +4,120 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
+using static UnityEngine.GraphicsBuffer;
 
 public class Drone : MonoBehaviour
 {
-    /*public float visionRange = 10f;
+    public float visionRange = 10f;
     public float evolutionTime = 20f;
     public GameObject adultDronePrefab;
-    public Transform player;
+    public Rigidbody rb;
+    //public Transform player;
 
     public float speed = 4f;
-    public float escapeVelocity = 6f;
-    public float maxLife = 2f;
     float life = 2f;
 
-    private bool evolved = false;*/
+    private bool evolved = false;
 
-    //Prueba Movimiento Random
-    public int rutina;
+    // Movimiento Random
+    public int routine;
     public float cromentro;
     public Animator ani;
-    public Quaternion angulo;
-    public float grado;
+    public Quaternion angle;
+    public float degree;
+    public GameObject player;
 
 
     // Start is called before the first frame update
     void Start()
     {
         ani = GetComponent<Animator>();
-       /* player = GameObject.FindGameObjectWithTag("Player").transform;
-        Invoke("Evolve", evolutionTime);*/
+        player = GameObject.Find("Player");
+        Invoke("Evolve", evolutionTime);
     }
 
     // Update is called once per frame
     void Update()
     {
-        comportamiento();
-       /* if (!evolved)
+        if (!evolved)
         {
-            EscapeFromPlayer();
-        }*/
+            Behavior();
+        }
     }
 
     void Evolve()
     {
-       /* if (!evolved && life > 0)
+        if (!evolved && life > 0)
         {
             evolved = true;
             GameObject newDrone = Instantiate(adultDronePrefab, transform.position, transform.rotation);
             Destroy(gameObject);
-        }*/
+        }
     }
 
-    /*void EscapeFromPlayer()
+    /* void EscapeFromPlayer()
+     {
+         float distanceToPlayer = Vector3.Distance(transform.position, player.transform.position);
+
+         if (distanceToPlayer <= visionRange)
+         {
+             Vector3 escapeDirection = transform.position - player.transform.position;
+
+             escapeDirection.Normalize();
+             transform.Translate(escapeDirection * speed * Time.deltaTime);
+         }
+     }*/
+
+    public void takeDamage(float amount)
     {
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        life -= amount;
+        rb.AddForce(Vector3.up * 3, ForceMode.Impulse);
 
-        if (distanceToPlayer <= visionRange)
+        if (life <= 0)
         {
-            Vector3 escapeDirection = transform.position - player.position;
-
-            escapeDirection.Normalize();
-            transform.Translate(escapeDirection * speed * Time.deltaTime);
+            Destroy(gameObject);
         }
-    }*/
+    }
 
-    void comportamiento()
+    void Behavior()
     {
-        cromentro += 1 * Time.deltaTime;
-
-        if (cromentro >= 4)
+        if (Vector3.Distance(transform.position, player.transform.position) > 5)
         {
-            rutina = UnityEngine.Random.Range(0, 2);
-            cromentro = 0;
+            ani.SetBool("run", false);
+            cromentro += 1 * Time.deltaTime;
+
+            if (cromentro >= 4)
+            {
+                routine = UnityEngine.Random.Range(0, 2);
+                cromentro = 0;
+            }
+
+            switch (routine)
+            {
+                case 0:
+                    ani.SetBool("walk", false);
+                    break;
+                case 1:
+                    degree = UnityEngine.Random.Range(0, 360);
+                    angle = Quaternion.Euler(0, degree, 0);
+                    routine++;
+                    break;
+                case 2:
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, angle, 0.5f);
+                    transform.Translate(Vector3.forward * 1 * Time.deltaTime);
+                    ani.SetBool("walk", true);
+                    break;
+            }
         }
-
-        switch(rutina)
+        else
         {
-            case 0:
-                ani.SetBool("walk", false);
-                break; 
-            case 1:
-                grado = UnityEngine.Random.Range(0, 360);
-                angulo = Quaternion.Euler(0, grado, 0);
-                rutina++;
-                break;
-            case 2:
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, angulo, 0.5f);
-                transform.Translate(Vector3.forward * 1 * Time.deltaTime);
-                ani.SetBool("walk", true);
-                break;
-
+            var lookPos = transform.position - player.transform.position;
+            lookPos.y = 0;
+            var rotation = Quaternion.LookRotation(lookPos);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, 3);
+            ani.SetBool("walk", false);
+            ani.SetBool("run", true);
+            transform.Translate(Vector3.forward * speed * Time.deltaTime);
         }
     }
 }

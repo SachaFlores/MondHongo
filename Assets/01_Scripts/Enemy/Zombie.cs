@@ -53,10 +53,7 @@ public class Zombie : MonoBehaviour
         if(distanceToPlayer <= 1)
         {
             MeleeAttack();
-        }
-        
-        
-        
+        }   
     }
     void rotateToTarget()
     {

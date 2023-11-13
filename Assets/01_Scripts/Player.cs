@@ -39,11 +39,13 @@ public class Player : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
     }
+
     bool dash = false;
     bool canDash = true;
     public float couldDownDash = 0f;
     public float TimeToDash = 3f;
     public float DashRecover = 0f;
+
     // Update is called once per frame
     void Update()
     {
@@ -195,7 +197,7 @@ public class Player : MonoBehaviour
     {
         life += -amount;
         rb.AddForce(Vector2.up * 3, ForceMode.Impulse);
-        Debug.Log(" Me atacaron");
+        Debug.Log("Me atacaron");
         if (life <= 0)
         {
             //Destroy(gameObject);
